@@ -2,6 +2,10 @@ package com.sour.mq;
 
 import com.sour.mq.bean.Book;
 import org.junit.jupiter.api.Test;
+import org.springframework.amqp.core.AmqpAdmin;
+import org.springframework.amqp.core.Binding;
+import org.springframework.amqp.core.DirectExchange;
+import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,6 +19,9 @@ class SpringbootMqApplicationTests {
 
     @Autowired
     RabbitTemplate rabbitTemplate;
+
+    @Autowired
+    AmqpAdmin amqpAdmin;
 
     /**
      *  1,单播(点对点)
@@ -81,5 +88,30 @@ class SpringbootMqApplicationTests {
         rabbitTemplate.convertAndSend("exchange.fanout", "", book);
 
     }
+
+
+    /**
+     *  创建交换机,创建队列,创建绑定关系
+     *
+     * @author xgl
+     * @date 2020/8/16 13:32
+     **/
+    @Test
+    public void createExchangeAndQueue() {
+        // 创建交换机
+        amqpAdmin.declareExchange(new DirectExchange("amqpadmin.exchange"));
+        System.out.println("-----创建交换机完成--------");
+
+        // 创建队列     Queue(队列名字, 是否持久化)
+        amqpAdmin.declareQueue(new Queue("amqpadmin.queue", true));
+        System.out.println("-----创建队列完成--------");
+
+        // 创建绑定关系
+        amqpAdmin.declareBinding(new Binding("amqpadmin.queue",
+                Binding.DestinationType.QUEUE, "amqpadmin.exchange", "amqp.haha",
+                null));
+        System.out.println("-----绑定成功完成--------");
+    }
+
 
 }
